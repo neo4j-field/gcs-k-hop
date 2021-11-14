@@ -11,22 +11,7 @@
   <modified_user>-</modified_user>
   <modified_date>2021/11/10 08:37:28.904</modified_date>
   <parameters>
-    <parameter>
-      <name>BATCH_SIZE</name>
-      <default_value>2000</default_value>
-      <description/>
-    </parameter>
-    <parameter>
-      <name>COPIES</name>
-      <default_value>30</default_value>
-      <description/>
-    </parameter>
-    <parameter>
-      <name>GCS_BUCKET</name>
-      <default_value>gs://test_bucket_twitter/output_pq_2</default_value>
-      <description/>
-    </parameter>
-  </parameters>
+    </parameters>
   <actions>
     <action>
       <name>Start</name>

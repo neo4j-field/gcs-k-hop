@@ -156,13 +156,13 @@ Neo4j server and the hop server are in the same region and zone
   * Optionally you can create a new connection through the hop gui and move the json to the server 
     (make sure that the json is named neo4j_graph.json)
 * cd into you hop installation folder and run the below project creation command:
-  * ./hop-conf.sh -pc -p=gcs-k-hop -ph=/path/to//downloaded/project
+  * ./hop-conf.sh -pc -p=gcs-khop -ph=/path/to//downloaded/project
   * The above command utilizes the hop-conf.sh tool to create a hop project
     * -pc project create
     * -p project name
     * -ph project home 
 * From the installation folder execute the workflow with the following command:
-  * /hop-run.sh -j gcs-k-hop -r local -f /path/to/workflow/file/main-workflow.hwf -p GCS_BUCKET=gs://your-bucket-name/folder,BATCH_SIZE=2000,COPIES=30
+  * ./hop-run.sh -j gcs-khop -r local -f /path/to/workflow/file/main-workflow.hwf -p GCS_BUCKET=gs://your-bucket-name/folder,BATCH_SIZE=2000,COPIES=30
   * The above command utilizes the hop-run.sh tool to run a workflow
     * -j project
     * -r run-configuration
