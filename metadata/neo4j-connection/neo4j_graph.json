@@ -1,5 +1,5 @@
 {
-  "server": "35.225.190.142",
+  "server": "34.136.244.16",
   "browserPort": "7474",
   "trustAllCertificatesVariable": "",
   "databaseName": "twitter300m",
@@ -10,7 +10,7 @@
   "boltPort": "7687",
   "usingEncryption": false,
   "trustAllCertificates": false,
-  "routing": false,
+  "routing": true,
   "password": "Encrypted 2be98afc86aa7f2e4cb2db931ca86fcc8",
   "usingEncryptionVariable": "",
   "version4": true,

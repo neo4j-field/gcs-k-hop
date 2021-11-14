@@ -27,8 +27,11 @@ This diagram represents a hop pipeline that contains two types of transformation
     service account with GCS access you can output the data directly to GCS with apache vfs
     by simply adding gs://url in the filename of the step. 
     http://hop.apache.org/manual/latest/pipeline/transforms/parquet-file-output.html
+    <br /><br />
+* The ${COPIES} variable represents the total number of copies for each step, each copy represents
+  one thread, for this execution we used a value of 30. 
 
-The (**Pull user internal id's**) transformation executes the below cypher statement:
+The (**Pull user internal id's**) transformation executes the below cypher statement extracted from the **cypher_files/source_query.cql** file:
 
 ```cypher
 MATCH (n:User)
@@ -40,7 +43,7 @@ Once the execution starts it streams the internal node id’s and distributes th
 transformations in the pipeline.<br />
 
 Each (**Retrieve K-Hops**) transformation receives a map of neo4j node ids controlled by a batch size,
-every map gets unwinded and executed against the database with the below cypher:
+every map gets unwinded and executed against the database with the below cypher extracted from the **cypher_files/k_hop_query.cql** file:
 
 ```cypher
 UNWIND $rows AS row
@@ -67,7 +70,7 @@ RETURN vertex, edgeType, source, destinations
 
 Each execution result of the transformations gets sent over to parquet files in gcs using apache vfs.
 The execution pipeline used for this test processes 30 (K-hop streams) in parallel and can be increased
-by adding more to the pipeline.<br />
+by changing the ${COPIES} variable value.<br />
 
 Different configuration options can be set in the Parquet File output transform.<br />
 The ${GCS_BUCKET} parameter is passed to the hop workflow with a value **gs://test_bucket_twitter/output_pq** 
@@ -76,27 +79,31 @@ Other configuration options are available, for this example SNAPPY compression a
 Under the fields section you can specify which fields to write and in which order. You can use the "Get Fields" button to populate the dialog.
 The fields are obtained from the previous step in the flow, in this case the above neo4j cypher statement
 <br /><br />
-![ParquetFileConfiguration](./parquet_file_config.JPG)
+![parquet_file_config.png](parquet_file_config.png)
 
 ### Configuration & Execution Results
 Neo4j server and the hop server are in the same region and zone
 #### Hardware
 * Neo4j Server
   * VM: n2-standard-48 (48 vCPUs, 192 GB memory)
+  * Zone: us-central-1a
   * SSD Persistent Disk
-  * Sample graph (~300m nodes, 1.5B rels)
+  * Sample graph (~300 million nodes, 1.5B relationships)
+  * Neo4j version 4.3.7 enterprise standalone server
   * Neo4j configuration:
     * dbms.memory.heap.initial_size=31g
     * dbms.memory.heap.max_size=31g
     * dbms.memory.pagecache.size=130g
 * Hop Server
   * VM: n1-standard-32 (32 vCPUs, 120 GB memory)
+  * Zone: us-central-1a
   * service account that has GCS access (Storage Admin or equivalent gcs write role)
   * hop memory configuration: 24g
 #### Execution Time
   * Runtime
-    * k-hop pipeline for 279,602,684 nodes and 2-10 hop levels total runtime was **27 minutes**
+    * k-hop pipeline for 279,603,745 nodes and 2-10 hop levels total runtime was **26 minutes**
     * 30 k-hop cypher step statements with a batch of 2000 (This equals to 30 threads)
+    * row processing output was 179,678 row/sec
 #### Output
   * GCS bucket output (290 snappy partitioned & compressed files)<br />
     ![gcsBucketOutput](./gcs_output_pq.JPG)
@@ -133,14 +140,16 @@ Neo4j server and the hop server are in the same region and zone
      as described above. It then sends those results to the parquet files directly into GCS via apache vfs.
      For this pipeline it is using 30 total k-hop transforms.
   * **If the cypher statement for k-hops is modified in the k_hop_query.cql file to return more or
-     different field types, then all the transforms for khop queries and parquet outputs will also need to be
+     different field types, then the Retrieve K-Hops and vertex-output steps will also need to be
      changed to accommodate for the fields and/or new data type mappings** 
 * **workflows:** Directory that contains the main workflow that executes the above pipeline in a sequence.
 * **main-workflow.hwf:** executes a combination of workflow actions and pipelines sequentially to process
    the k-hop data.
 ### Workflow Execution & Set-up Instructions
 #### Steps to run on server with hop run tool:
-* Download hop project into your preferred location 
+* Download hop project into your preferred location
+* Set the HOP_OPTIONS="-Xmx24g" environment variable in your server
+  * For this example it is setting hop to use 24g of memory
 * cd into downloaded project location
   * Modify the json file located in metadata/neo4j-connection/neo4j_graph.json
   * Modify the server, databaseName, boltPort, username, password fields for your connection
@@ -153,14 +162,33 @@ Neo4j server and the hop server are in the same region and zone
     * -p project name
     * -ph project home 
 * From the installation folder execute the workflow with the following command:
-  * /hop-run.sh -j gcs-k-hop -r local -f /path/to/workflow/file/main-workflow.hwf -p GCS_BUCKET=gs://your-bucket-name/folder,BATCH_SIZE=2000
+  * /hop-run.sh -j gcs-k-hop -r local -f /path/to/workflow/file/main-workflow.hwf -p GCS_BUCKET=gs://your-bucket-name/folder,BATCH_SIZE=2000,COPIES=30
   * The above command utilizes the hop-run.sh tool to run a workflow
     * -j project
     * -r run-configuration
     * -f filename of the workflow to run (this will be the main-workflow.hwf file in workflows directory home)
     * -p comma separated list of PARAMETER=VALUE pairs
     * & To run in background of the server session 
-* In the execution command you pass the GCS_BUCKET and BATCH_SIZE parameters, once the execution stars it 
+* In the execution command you pass the GCS_BUCKET,BATCH_SIZE and COPIES parameters, once the execution stars it 
   will stream the data from neo4j into gcs
 
-    
+#### Neo4j connection
+* The neo4j connection can be managed through the metadata perspective in the Hop GUI, Neo4j connection are serialized as JSON in the Hop metadata folder under 
+  **metadata/neo4j-connection/**
+* You can also change the connection details by modifying the json yourself
+* Hop GUI connection dialog: https://hop.apache.org/manual/latest/metadata-types/neo4j/neo4j-connection.html#top <br />
+  ![neo4j_connection.png](neo4j_connection.png)
+
+  Option           | Description
+  -------------    | -------------
+  Connection name  | The name of a connection uniquely identifying it
+  Server or IP Address  | The IP address or hostname used to reach the Neo4j server. **If you have more than one server address to specify, use a comma separated list of hosts.**
+  Database Name (4.0)  | The database to use (defaults to neo4j). A feature available on plugins version 5.0 or higher against Neo4j server 4.0 or higher.
+  Version 4 database?  | Enable this option to help us generate the most optimized Cypher for you.
+  Bolt port | the Neo4j Bolt protocol port, default is 7687
+  Browser port | information only. The port on which the Neo4j browser runs
+  Use routing | enable this option to use the bolt+routing protocol
+  Routing policy | The bolt+routing policy to use
+  Username | the Neo4j database user to log in with
+  Password | the password to use
+  Use encryption? | Unless you generated and configured the correct SSL keys, disable this. Make sure to check our v4 upgrade notes
