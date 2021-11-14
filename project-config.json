@@ -1,0 +1,11 @@
+{
+  "description" : "Incremental Ingestion",
+  "company" : "Twitter",
+  "metadataBaseFolder" : "${PROJECT_HOME}/metadata",
+  "unitTestsBasePath" : "${PROJECT_HOME}",
+  "dataSetsCsvFolder" : "${PROJECT_HOME}/datasets",
+  "enforcingExecutionInHome" : true,
+  "config" : {
+    "variables" : [ ]
+  }
+}
