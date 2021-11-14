@@ -1,7 +1,7 @@
 # Apache HOP Google Cloud Storage
 Writing incremental parquet files from Neo4j to GCS with apache hop
 
-###Overall Architecture
+### Overall Architecture
 ![ArchitectureDiagram](./architecture_diagram.svg)
 
 1. Apache hop is running on a gcp vm. It executes the workflows / pipelines using the **local execution
@@ -78,9 +78,9 @@ The fields are obtained from the previous step in the flow, in this case the abo
 <br /><br />
 ![ParquetFileConfiguration](./parquet_file_config.JPG)
 
-###Configuration & Execution Results
+### Configuration & Execution Results
 Neo4j server and the hop server are in the same region and zone
-####Hardware
+#### Hardware
 * Neo4j Server
   * VM: n2-standard-48 (48 vCPUs, 192 GB memory)
   * SSD Persistent Disk
@@ -93,17 +93,17 @@ Neo4j server and the hop server are in the same region and zone
   * VM: n1-standard-32 (32 vCPUs, 120 GB memory)
   * service account that has GCS access (Storage Admin or equivalent gcs write role)
   * hop memory configuration: 24g
-####Execution Time
+#### Execution Time
   * Runtime
     * k-hop pipeline for 279,602,684 nodes and 2-10 hop levels total runtime was **27 minutes**
     * 30 k-hop cypher step statements with a batch of 2000 (This equals to 30 threads)
-####Output
+#### Output
   * GCS bucket output (290 snappy partitioned & compressed files)<br />
     ![gcsBucketOutput](./gcs_output_pq.JPG)
   * Output field (edgeType, source, destinations) are returned as array of strings
     ![dataFormatSample](./data_format_sample.JPG)
-###Installation
-####Apache Hop Installation
+### Installation
+#### Apache Hop Installation
 * Download
   * Download the latest version of Apache Hop from the download page here https://hop.apache.org/download/. 
 * Install
@@ -112,7 +112,7 @@ Neo4j server and the hop server are in the same region and zone
 * Prerequisites
   * Hop is self-contained, all you need is a Java runtime. Hop has been developed and tested with
      Java 8, but you shouldn’t have any issues running Hop with Java 11.
-###Project Structure
+### Project Structure
 ![projectStructure](./project_structure.JPG)
 * **gcs-khop:** Main directory of project
 * **cypher-files:** Directory that contains two cypher statement files
@@ -138,8 +138,8 @@ Neo4j server and the hop server are in the same region and zone
 * **workflows:** Directory that contains the main workflow that executes the above pipeline in a sequence.
 * **main-workflow.hwf:** executes a combination of workflow actions and pipelines sequentially to process
    the k-hop data.
-###Workflow Execution & Set-up Instructions
-####Steps to run on server with hop run tool:
+### Workflow Execution & Set-up Instructions
+#### Steps to run on server with hop run tool:
 * Download hop project into your preferred location 
 * cd into downloaded project location
   * Modify the json file located in metadata/neo4j-connection/neo4j_graph.json
