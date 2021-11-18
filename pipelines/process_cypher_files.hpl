@@ -23,18 +23,18 @@
   </notepads>
   <order>
     <hop>
-      <from>Load source cypher</from>
+      <from>Read source_query.cql </from>
       <to>Set SOURCE_CYPHER variable</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Load k-hop query cypher</from>
+      <from>Read k_hop_query.cql</from>
       <to>Set K_HOP_CYPHER variable</to>
       <enabled>Y</enabled>
     </hop>
   </order>
   <transform>
-    <name>Load k-hop query cypher</name>
+    <name>Read k_hop_query.cql</name>
     <type>LoadFileInput</type>
     <description/>
     <distribute>Y</distribute>
@@ -53,7 +53,7 @@
     <rownum_field/>
     <encoding>UTF-8</encoding>
     <file>
-      <name>C:\twitter-incremental\cypher_files\k_hop_query.cql</name>
+      <name>${PROJECT_HOME}/cypher_files/k_hop_query.cql</name>
       <filemask/>
       <exclude_filemask/>
       <file_required>N</file_required>
@@ -91,7 +91,7 @@
     </GUI>
   </transform>
   <transform>
-    <name>Load source cypher</name>
+    <name>Read source_query.cql </name>
     <type>LoadFileInput</type>
     <description/>
     <distribute>Y</distribute>
@@ -110,7 +110,7 @@
     <rownum_field/>
     <encoding>UTF-8</encoding>
     <file>
-      <name>C:\twitter-incremental\cypher_files\source_query.cql</name>
+      <name>${PROJECT_HOME}/cypher_files/source_query.cql</name>
       <filemask/>
       <exclude_filemask/>
       <file_required>N</file_required>
