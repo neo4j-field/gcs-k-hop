@@ -8,7 +8,7 @@ Writing incremental parquet files from Neo4j to GCS with apache hop
    engine and not the dataflow engine**. Using the Neo4j java driver it submits cypher queries to stream
    data from the neo4j database.<br /><br />
 2. Once the data starts streaming from the database, it starts to stream the data out directly into the
-   specified GCS location into csv files using apache vfs. <br /><br />
+   specified GCS location into parquet files using apache vfs. <br /><br />
 
 The following diagram provides an example view of the data flow inside the export pipeline
 
